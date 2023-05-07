@@ -5,7 +5,7 @@ DISABLE_AUTO_UPDATE="true"
 DISABLE_LS_COLORS="true"
 DISABLE_CORRECTION="true"
 COMPLETION_WAITING_DOTS="true"
-plugins=(bundler capistrano catimg colorize command-not-found gem git macos ssh-agent)
+base_zsh_plugins=(bundler capistrano catimg colorize command-not-found gem git ssh-agent)
 autoload -U compinit && compinit
 
 export PATH="/usr/local/bin:$PATH"
@@ -111,10 +111,6 @@ export PATH="$PATH:$HOME/.local/bin"
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 
-# https://github.com/rbenv/ruby-build/issues/1691#issuecomment-772224551
-# Homebrew
-export PATH=/opt/homebrew/bin:$PATH
-export PATH="/opt/homebrew/sbin:$PATH"
 
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
@@ -130,4 +126,27 @@ alias ls="exa -al"
 export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl) --with-readline-dir=$(brew --prefix readline)"
 export RUBY_CFLAGS="-Wno-error=implicit-function-declaration"
 
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
+
+# https://stackoverflow.com/a/8597411
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  # ...
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  base_zsh_plugins+=(macos)
+  # https://github.com/rbenv/ruby-build/issues/1691#issuecomment-772224551
+  export PATH="/opt/homebrew/bin:$PATH"
+  export PATH="/opt/homebrew/sbin:$PATH"
+  . "/opt/homebrew/opt/asdf/libexec/asdf.sh"
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+  # POSIX compatibility layer and Linux environment emulation for Windows
+elif [[ "$OSTYPE" == "msys" ]]; then
+  # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+elif [[ "$OSTYPE" == "win32" ]]; then
+  # I'm not sure this can happen.
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+  # ...
+else
+  # Unknown.
+fi
+
+plugins=$base_zsh_plugins
